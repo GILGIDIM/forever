@@ -79,7 +79,6 @@ export default function CharacterTable({ characters, canEdit, onEdit, onMove }) 
                         <span className="name-static"><span className="forename">{c.forename}</span>{c.surname && <span className="surname"> {c.surname}</span>}</span>
                       )}
                       <span className="who-meta">
-                        {i === 0 && <span className="main-tag">Main</span>}
                         <span>{RACE_BY_ID[c.race]?.name}</span> <span className="class-name">{cls?.name}</span>
                       </span>
                       {learned.length > 0 && (

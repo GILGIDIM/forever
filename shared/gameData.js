@@ -47,7 +47,7 @@ export const CLASSES = [
 ];
 
 // iconKey is the in-game icon file name (race_<iconKey>_<gender>).
-// Skyborne is new, so its icon name is unknown and the UI falls back to a crest.
+// Skyborne has no portrait of its own yet, so it borrows the Blood Elf ones.
 export const RACES = [
   { id: 'human', name: 'Human', iconKey: 'human' },
   { id: 'dwarf', name: 'Dwarf', iconKey: 'dwarf' },
@@ -57,7 +57,7 @@ export const RACES = [
   { id: 'tauren', name: 'Tauren', iconKey: 'tauren' },
   { id: 'troll', name: 'Troll', iconKey: 'troll' },
   { id: 'undead', name: 'Undead', iconKey: 'scourge' },
-  { id: 'skyborne', name: 'Skyborne', iconKey: null, requiresPack: true },
+  { id: 'skyborne', name: 'Skyborne', iconKey: 'bloodelf', requiresPack: true },
 ];
 
 // Allowed classes per faction and race (Warcraft Wiki, Forever page,

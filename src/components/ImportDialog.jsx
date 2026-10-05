@@ -61,7 +61,7 @@ export default function ImportDialog({ poolId, onAdd, onClose }) {
                   <span className="muted">
                     {RACE_BY_ID[c.race]?.name || 'Unknown race'} {CLASS_BY_ID[c.class]?.name || 'unknown class'}
                     {c.realmName ? `, ${c.realmName}` : ''}
-                    {c.alreadyAdded ? ' — already in this pool' : ''}
+                    {c.alreadyAdded ? ' — already in this warband' : ''}
                     {!c.supported ? ' — not recognised as a Forever character' : ''}
                   </span>
                 </span>

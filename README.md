@@ -1,13 +1,13 @@
-# Forever Tracker
+# Forever Warband
 
-Character pool planner for World of Warcraft: Forever — **forever.gilgidim.dev**.
+Warband planner for World of Warcraft: Forever — **forever.gilgidim.dev**.
 
-- Sign in with Battle.net; each region + ruleset is its own character pool.
+- Sign in with Battle.net; each region + ruleset is its own warband.
 - Faction → class → race picker that only offers combinations Forever allows (including the six new combos and Skyborne).
 - Forename and surname, gender-specific race portrait, class colour.
 - 9 primary + 3 secondary professions, 0–300, with a hard limit of 2 primaries.
-- Drag (or ▲/▼) to order your main and alts; **Save changes** stores the current state.
-- Read-only share link (`/u/<your-battletag>`) for your brothers; they sign in to keep their own pools.
+- Drag (or ▲/▼) to order your characters (the top one is your main); **Save changes** stores the current state.
+- Read-only share link (`/u/<your-battletag>`) for your brothers; they sign in to keep their own warbands.
 - Import from Battle.net and Sync levels/professions once Blizzard publishes the Forever API namespace. Until then everything works by hand.
 
 ## Stack

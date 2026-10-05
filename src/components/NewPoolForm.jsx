@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { REGIONS, RULESETS } from '../../shared/gameData.js';
 
-// Region + ruleset picker. Each combination is its own character pool.
+// Region + ruleset picker. Each combination is its own warband.
 export default function NewPoolForm({ existing = [], onCreate, onCancel, busy }) {
   const [region, setRegion] = useState('eu');
   const [ruleset, setRuleset] = useState('pvp');
@@ -30,7 +30,7 @@ export default function NewPoolForm({ existing = [], onCreate, onCancel, busy })
       <div className="new-pool-actions">
         {onCancel && <button type="button" className="btn ghost" onClick={onCancel}>Cancel</button>}
         <button type="submit" className="btn primary" disabled={busy}>
-          {taken ? 'Open this pool' : 'Create pool'}
+          {taken ? 'Open this warband' : 'Create warband'}
         </button>
       </div>
     </form>

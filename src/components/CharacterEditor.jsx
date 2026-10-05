@@ -40,7 +40,7 @@ function ProfessionRow({ prof, value, disabled, onToggle, onChange }) {
   );
 }
 
-export default function CharacterEditor({ character, isNew, isMain, defaultRealm, onSave, onDelete, onClose }) {
+export default function CharacterEditor({ character, isNew, defaultRealm, onSave, onDelete, onClose }) {
   const ref = useRef(null);
   const [c, setC] = useState(character);
   const [errors, setErrors] = useState([]);
@@ -89,7 +89,7 @@ export default function CharacterEditor({ character, isNew, isMain, defaultRealm
           <Portrait race={c.race} gender={c.gender} classId={c.class} faction={c.faction} level={c.level} size={64} />
           <div>
             <h2 id="editor-title">{isNew ? 'New character' : (c.forename || 'Edit character')}</h2>
-            <p className="muted">{isMain ? 'Your main' : 'Drag rows in the list to change who comes first.'}</p>
+            <p className="muted">Drag rows in the list to change who comes first.</p>
           </div>
           <button type="button" className="icon-btn close" onClick={() => ref.current.close()} aria-label="Close">✕</button>
         </header>
@@ -182,7 +182,7 @@ export default function CharacterEditor({ character, isNew, isMain, defaultRealm
 
         <footer className="editor-foot">
           {!isNew && (
-            <button type="button" className="btn danger" onClick={() => { if (confirm(`Remove ${c.forename || 'this character'} from the pool?`)) onDelete(c.id); }}>
+            <button type="button" className="btn danger" onClick={() => { if (confirm(`Remove ${c.forename || 'this character'} from the warband?`)) onDelete(c.id); }}>
               Remove
             </button>
           )}

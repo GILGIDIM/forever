@@ -150,10 +150,10 @@ export default function PoolView({ poolId, apiAvailable }) {
 
       {chars.length === 0 ? (
         <div className="empty">
-          <p>{canEdit ? 'No characters yet. Add your main first; you can drag to reorder later.' : 'Nothing here yet.'}</p>
+          <p>{canEdit ? 'No characters yet. Add one to get started; you can drag to reorder later.' : 'Nothing here yet.'}</p>
           {canEdit && (
             <button type="button" className="btn primary"
-              onClick={() => setEditing({ character: blankCharacter(newId()), isNew: true })}>Add your main</button>
+              onClick={() => setEditing({ character: blankCharacter(newId()), isNew: true })}>Add your first character</button>
           )}
         </div>
       ) : (
@@ -165,7 +165,7 @@ export default function PoolView({ poolId, apiAvailable }) {
         <div className="share">
           <label className="switch">
             <input type="checkbox" checked={pool.isPublic} onChange={toggleVisibility} disabled={busy} />
-            <span>Anyone with your link can view this pool</span>
+            <span>Anyone with your link can view this warband</span>
           </label>
           {pool.isPublic && (
             <button type="button" className="btn ghost" onClick={copyShare}>Copy share link</button>
@@ -175,7 +175,7 @@ export default function PoolView({ poolId, apiAvailable }) {
 
       {editing && (
         <CharacterEditor key={editing.character.id} character={editing.character} isNew={editing.isNew}
-          isMain={chars[0]?.id === editing.character.id} defaultRealm={realm}
+          defaultRealm={realm}
           onSave={applyEdit} onDelete={remove} onClose={() => setEditing(null)} />
       )}
       {importing && <ImportDialog poolId={pool.id} onAdd={addImported} onClose={() => setImporting(false)} />}

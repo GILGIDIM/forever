@@ -33,12 +33,12 @@ export function toPool(row) {
 export async function loadPool(id, viewer) {
   const sql = db();
   const poolId = Number(id);
-  if (!Number.isInteger(poolId)) throw new HttpError(404, 'Pool not found.');
+  if (!Number.isInteger(poolId)) throw new HttpError(404, 'Warband not found.');
   const [row] = await sql`
     SELECT p.*, u.battletag, u.handle FROM pools p JOIN users u ON u.id = p.user_id
     WHERE p.id = ${poolId}`;
   const isOwner = Boolean(viewer && row && viewer.id === row.user_id);
-  if (!row || (!row.is_public && !isOwner)) throw new HttpError(404, 'Pool not found.');
+  if (!row || (!row.is_public && !isOwner)) throw new HttpError(404, 'Warband not found.');
   const chars = await sql`SELECT * FROM characters WHERE pool_id = ${poolId} ORDER BY position`;
   return {
     pool: { ...toPool(row), owner: { battletag: row.battletag, handle: row.handle } },
@@ -50,7 +50,7 @@ export async function loadPool(id, viewer) {
 
 export async function requireOwnedPool(id, user) {
   const data = await loadPool(id, user);
-  if (!data.canEdit) throw new HttpError(403, 'Only the owner can change this pool.');
+  if (!data.canEdit) throw new HttpError(403, 'Only the owner can change this warband.');
   return data;
 }
 

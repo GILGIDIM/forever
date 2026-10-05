@@ -69,7 +69,7 @@ export function validatePool(characters) {
   if (!Array.isArray(characters)) return { characters: [], errors: ['Characters must be a list.'] };
   const errors = [];
   if (characters.length > MAX_CHARACTERS_PER_POOL) {
-    errors.push(`A pool can hold at most ${MAX_CHARACTERS_PER_POOL} characters.`);
+    errors.push(`A warband can hold at most ${MAX_CHARACTERS_PER_POOL} characters.`);
   }
   const seen = new Set();
   const out = characters.map((raw, i) => {

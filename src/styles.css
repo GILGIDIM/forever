@@ -1,4 +1,4 @@
-/* Forever Tracker — slate-blue stone with the old UI's gold for names. */
+/* Forever Warband — slate-blue stone with the old UI's gold for names. */
 :root {
   --bg: #17202e;
   --panel: #1f2a3b;
@@ -76,6 +76,32 @@ button, input { font: inherit; color: inherit; }
 .landing h1, .start h1 { font: 2.3rem/1.15 var(--display); color: var(--gold); margin: 0 0 1rem; font-weight: 400; }
 .landing p { color: var(--muted); font-size: 1.08rem; max-width: 60ch; }
 .landing .btn { margin-top: 1rem; }
+
+/* Signed-out homepage: Blizzard key art behind a centred title. The art is
+   scaled up a little to crop the decorative frame baked into the image. */
+.app > main.hero { display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 2rem; }
+.hero-art {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; background: #0d1410;
+}
+.hero-art::before {
+  content: ''; position: absolute; inset: 0; transform: scale(1.12);
+  background: url('https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt491397daad992c6d/6aa09e0ec751e10dc30c50e0/Soak_in_Breathtaking_Expanses.jpg') center / cover no-repeat;
+}
+.hero-art::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(8, 12, 10, 0.2) 0%, rgba(8, 12, 10, 0.65) 80%),
+    linear-gradient(to bottom, rgba(8, 12, 10, 0.5), transparent 20%, transparent 75%, rgba(8, 12, 10, 0.7));
+}
+.hero-body { max-width: 880px; }
+.hero h1 {
+  font: 3.4rem/1.1 var(--display); font-weight: 400; color: var(--gold); margin: 0 0 1rem;
+  letter-spacing: 0.02em; text-shadow: 0 2px 4px #000, 0 0 24px rgba(0, 0, 0, 0.8);
+}
+.hero p { color: #efe6cf; font-size: 1.2rem; margin: 0 auto; max-width: 52ch; text-shadow: 0 1px 3px #000; }
+.hero .btn { margin-top: 2rem; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6); }
+.hero .status { margin: 1.5rem auto 0; max-width: 52ch; }
+@media (max-width: 600px) { .hero h1 { font-size: 2.4rem; } .hero p { font-size: 1.05rem; } }
 .new-pool fieldset { border: 0; padding: 0; margin: 1.5rem 0 0; }
 .new-pool legend { color: var(--muted); margin-bottom: 0.5rem; }
 .new-pool-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2rem; }
@@ -88,7 +114,7 @@ button, input { font: inherit; color: inherit; }
 .seg-btn.faction-horde.on { border-color: var(--horde); color: #ffd4cf; background: #45201d; }
 .seg.small .seg-btn { padding: 0.3rem 0.8rem; font-size: 0.94rem; }
 
-/* Pool tabs */
+/* Warband tabs */
 .pool-tabs { display: flex; gap: 0.25rem; margin: 1.25rem 0 0; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
 .tab {
   background: none; border: 1px solid transparent; border-bottom: 0; padding: 0.5rem 1rem; cursor: pointer;
@@ -112,7 +138,7 @@ button, input { font: inherit; color: inherit; }
 .notice { padding: 1rem; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--panel); }
 .empty { padding: 3rem 1rem; text-align: center; border: 1px dashed var(--line); border-radius: var(--radius-m); color: var(--muted); }
 
-/* The pool table */
+/* The warband table */
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--panel); }
 .pool-table { width: 100%; border-collapse: collapse; }
 .pool-table th, .pool-table td { padding: 0; }
@@ -138,7 +164,6 @@ th.col-who { text-align: left; font-weight: 400; padding: 0.45rem 0.75rem 0.45re
 .surname { font: 1.12rem var(--display); color: var(--text); }
 .who-meta { font-size: 0.9rem; color: var(--muted); display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
 .class-name { color: var(--class); }
-.main-tag { font-size: 0.78rem; padding: 0 0.4rem; border: 1px solid #a77d1d; color: var(--gold); border-radius: 999px; }
 .prof-chips { display: none; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
 .chip { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; padding: 0.1rem 0.4rem 0.1rem 0.15rem; border-radius: var(--radius-s); }
 

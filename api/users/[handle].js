@@ -8,7 +8,7 @@ export default handler(['GET'], async (req, res) => {
   const handle = String(getQuery(req).handle || '').toLowerCase();
   const sql = db();
   const [owner] = await sql`SELECT id, battletag, handle FROM users WHERE handle = ${handle}`;
-  if (!owner) throw new HttpError(404, 'No one with that link has a character pool yet.');
+  if (!owner) throw new HttpError(404, 'No one with that link has a warband yet.');
   const viewer = await currentUser(req);
   const isOwner = viewer?.id === owner.id;
   const rows = await sql`

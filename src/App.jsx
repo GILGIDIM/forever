@@ -4,13 +4,15 @@ import { poolLabel } from './format.js';
 import PoolView from './components/PoolView.jsx';
 import NewPoolForm from './components/NewPoolForm.jsx';
 
-// Routes: "/"            your pools (signed in) or the sign-in page
-//         "/u/<handle>"  someone's public pools, read-only
-//         "?pool=<id>"   which pool tab is open on either page
+// Routes: "/"               your warbands (signed in) or the sign-in page
+//         "/u/<handle>"     someone's public warbands, read-only
+//         "?warband=<id>"   which warband tab is open on either page
+//                           (?pool=<id> still works for links shared before the rename)
 function useRoute() {
   const read = () => {
     const m = window.location.pathname.match(/^\/u\/([^/]+)/);
-    const pool = new URLSearchParams(window.location.search).get('pool');
+    const q = new URLSearchParams(window.location.search);
+    const pool = q.get('warband') || q.get('pool');
     return { handle: m ? decodeURIComponent(m[1]) : null, pool: pool ? Number(pool) : null };
   };
   const [route, setRoute] = useState(read);
@@ -38,7 +40,7 @@ function Header({ me, onSignOut, go }) {
           <path d="M16 3l10 5.5v8.5c0 5.6-4.3 10-10 12-5.7-2-10-6.4-10-12V8.5z" fill="none" stroke="currentColor" strokeWidth="2" />
           <path d="M11 11h10M11 11v11M11 16h7" stroke="currentColor" strokeWidth="2" fill="none" />
         </svg>
-        <span>Forever Tracker</span>
+        <span>Forever Warband</span>
       </a>
       <div className="site-user">
         {me?.user ? (
@@ -56,14 +58,14 @@ function Header({ me, onSignOut, go }) {
 
 function PoolTabs({ pools, activeId, onPick, onNew }) {
   return (
-    <nav className="pool-tabs" aria-label="Character pools">
+    <nav className="pool-tabs" aria-label="Warbands">
       {pools.map((p) => (
         <button type="button" key={p.id} className={`tab ${p.id === activeId ? 'on' : ''}`}
           aria-current={p.id === activeId ? 'page' : undefined} onClick={() => onPick(p.id)}>
           {poolLabel(p)} <span className="tab-count">{p.characterCount}</span>
         </button>
       ))}
-      {onNew && <button type="button" className="tab tab-new" onClick={onNew}>New pool</button>}
+      {onNew && <button type="button" className="tab tab-new" onClick={onNew}>New warband</button>}
     </nav>
   );
 }
@@ -71,15 +73,17 @@ function PoolTabs({ pools, activeId, onPick, onNew }) {
 function Landing({ me }) {
   const signinError = new URLSearchParams(window.location.search).get('signin');
   return (
-    <main className="landing">
-      <h1>Plan your characters for World of Warcraft: Forever.</h1>
-      <p>Keep every character you mean to level in one list: faction, race and class, names, levels and professions, with your main at the top.
-        Your brothers get a read-only link; they sign in to keep their own.</p>
-      {signinError && <p className="status status-error" role="alert">{SIGNIN_ERRORS[signinError] || 'Sign-in failed. Try again.'}</p>}
-      <a className="btn primary large" href="/api/auth/login">Sign in with Battle.net</a>
-      {me.devLogin && (
-        <p className="hint">Local development: <a href="/api/auth/dev?as=Gilgidim%231234">sign in as a test user</a>.</p>
-      )}
+    <main className="hero">
+      <div className="hero-art" aria-hidden="true" />
+      <div className="hero-body">
+        <h1>Create your Forever Warband</h1>
+        <p>Plan your warband tracking their faction, race, class, names, levels and professions.</p>
+        {signinError && <p className="status status-error" role="alert">{SIGNIN_ERRORS[signinError] || 'Sign-in failed. Try again.'}</p>}
+        <a className="btn primary large" href="/api/auth/login">Sign in with Battle.net</a>
+        {me.devLogin && (
+          <p className="hint">Local development: <a href="/api/auth/dev?as=Gilgidim%231234">sign in as a test user</a>.</p>
+        )}
+      </div>
     </main>
   );
 }
@@ -99,15 +103,15 @@ function MyPools({ me, route, go }) {
       const { pool } = await api.createPool(region, ruleset);
       setPools((prev) => (prev.some((p) => p.id === pool.id) ? prev : [...prev, pool]));
       setCreating(false);
-      go(`/?pool=${pool.id}`);
+      go(`/?warband=${pool.id}`);
     } finally { setBusy(false); }
   };
 
   if (pools.length === 0 || creating) {
     return (
       <main className="start">
-        <h1>{pools.length === 0 ? 'Where will you be playing?' : 'New character pool'}</h1>
-        <p className="muted">Each region and ruleset gets its own pool, so you can plan a Hardcore set separately from your PvP characters.</p>
+        <h1>{pools.length === 0 ? 'Where will you be playing?' : 'New warband'}</h1>
+        <p className="muted">Each region and ruleset gets its own warband, so you can plan a Hardcore set separately from your PvP characters.</p>
         <NewPoolForm existing={pools} onCreate={create} busy={busy} onCancel={pools.length ? () => setCreating(false) : null} />
       </main>
     );
@@ -116,7 +120,7 @@ function MyPools({ me, route, go }) {
   const active = pools.find((p) => p.id === route.pool) || pools[0];
   return (
     <main>
-      <PoolTabs pools={pools} activeId={active.id} onPick={(id) => go(`/?pool=${id}`)} onNew={() => setCreating(true)} />
+      <PoolTabs pools={pools} activeId={active.id} onPick={(id) => go(`/?warband=${id}`)} onNew={() => setCreating(true)} />
       <PoolView key={active.id} poolId={active.id} me={me} apiAvailable={me.apiAvailable} />
     </main>
   );
@@ -130,16 +134,16 @@ function SharedPools({ handle, route, go, me }) {
   if (error) return <main className="landing"><p className="status status-error">{error.message}</p></main>;
   if (!data) return <p className="hint pad">Loading…</p>;
   if (data.pools.length === 0) {
-    return <main className="landing"><p>{data.owner.battletag.split('#')[0]} hasn't shared any character pools.</p></main>;
+    return <main className="landing"><p>{data.owner.battletag.split('#')[0]} hasn't shared any warbands.</p></main>;
   }
   const active = data.pools.find((p) => p.id === route.pool) || data.pools[0];
   return (
     <main>
       <PoolTabs pools={data.pools} activeId={active.id}
-        onPick={(id) => go(`/u/${encodeURIComponent(handle)}?pool=${id}`)} />
+        onPick={(id) => go(`/u/${encodeURIComponent(handle)}?warband=${id}`)} />
       <PoolView key={active.id} poolId={active.id} me={me} apiAvailable={me.apiAvailable} />
       {!me.user && (
-        <p className="hint pad">Want your own list? <a href="/api/auth/login">Sign in with Battle.net</a>.</p>
+        <p className="hint pad">Want your own warband? <a href="/api/auth/login">Sign in with Battle.net</a>.</p>
       )}
     </main>
   );
