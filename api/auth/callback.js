@@ -47,5 +47,5 @@ export default handler(['GET'], async (req, res) => {
     RETURNING id`;
 
   setCookies(res, [await sessionCookie(user.id), cookie('ft_oauth_state', '', { maxAge: 0 })]);
-  redirect(res, `${publicUrl()}/`);
+  redirect(res, `${publicUrl()}/?signedin=1`);
 });

@@ -24,8 +24,7 @@ export function validateCharacter(input) {
     gender: c.gender,
     level: c.level == null || c.level === '' ? 1 : Number(c.level),
     professions: {},
-    apiName: c.apiName ? cleanName(c.apiName) : null,
-    apiRealm: c.apiRealm ? String(c.apiRealm).trim() : null,
+    armorySlug: c.armorySlug ? String(c.armorySlug).trim().toLowerCase() : null,
     syncedAt: c.syncedAt || null,
   };
 

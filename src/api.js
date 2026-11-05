@@ -30,6 +30,6 @@ export const api = {
   setVisibility: (id, isPublic) => request('PATCH', `/api/pools/${id}`, { isPublic }),
   deletePool: (id) => request('DELETE', `/api/pools/${id}`),
   userPools: (handle) => request('GET', `/api/users/${encodeURIComponent(handle)}`),
-  importable: (poolId) => request('GET', `/api/import?poolId=${poolId}`),
-  sync: (poolId) => request('POST', '/api/sync', { poolId }),
+  sync: () => request('POST', '/api/sync'),
+  lookup: (region, q) => request('GET', `/api/lookup?region=${region}&q=${encodeURIComponent(q)}`),
 };

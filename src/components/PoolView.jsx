@@ -1,21 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RULESET_BY_ID, MAX_CHARACTERS_PER_POOL } from '../../shared/gameData.js';
+import React, { useCallback, useEffect, useState } from 'react';
+import { MAX_CHARACTERS_PER_POOL } from '../../shared/gameData.js';
 import { api } from '../api.js';
 import { newId, timeAgo, poolLabel } from '../format.js';
 import CharacterTable from './CharacterTable.jsx';
 import CharacterEditor, { blankCharacter } from './CharacterEditor.jsx';
-import ImportDialog from './ImportDialog.jsx';
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-export default function PoolView({ poolId, apiAvailable }) {
+// onSync is only passed on your own warbands page; it syncs every warband.
+export default function PoolView({ poolId, onSync, syncing }) {
   const [data, setData] = useState(null);       // last saved server state
   const [chars, setChars] = useState([]);       // working copy
   const [error, setError] = useState(null);
   const [status, setStatus] = useState(null);   // { tone, text, details }
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(null); // { character, isNew }
-  const [importing, setImporting] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -37,9 +36,6 @@ export default function PoolView({ poolId, apiAvailable }) {
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
 
-  const realm = data ? RULESET_BY_ID[data.pool.ruleset]?.realmSlug : null;
-  const linkedCount = useMemo(() => chars.filter((c) => c.apiName && c.apiRealm).length, [chars]);
-
   if (error) return <div className="notice"><p>{error.message}</p></div>;
   if (!data) return <p className="hint pad">Loading characters…</p>;
 
@@ -60,14 +56,6 @@ export default function PoolView({ poolId, apiAvailable }) {
 
   const remove = (id) => { setChars((prev) => prev.filter((c) => c.id !== id)); setEditing(null); };
 
-  const addImported = (list) => {
-    setChars((prev) => [...prev, ...list.map((c) => ({
-      id: newId(), forename: c.name, surname: '', faction: c.faction, race: c.race, class: c.class,
-      gender: c.gender, level: c.level || 1, professions: {}, apiName: c.name, apiRealm: c.realmSlug, syncedAt: null,
-    }))]);
-    setStatus({ tone: 'info', text: `Added ${list.length}. Save changes to keep them, then Sync to pull levels and professions.` });
-  };
-
   const save = async () => {
     setBusy(true); setStatus(null);
     try {
@@ -76,19 +64,6 @@ export default function PoolView({ poolId, apiAvailable }) {
       setStatus({ tone: 'ok', text: 'Saved.' });
     } catch (e) {
       setStatus({ tone: 'error', text: e.message, details: e.details });
-    } finally { setBusy(false); }
-  };
-
-  const sync = async () => {
-    setBusy(true); setStatus(null);
-    try {
-      const d = await api.sync(pool.id);
-      setData(d); setChars(d.characters);
-      const updated = d.results.filter((r) => r.status === 'updated').length;
-      const missing = d.results.length - updated;
-      setStatus({ tone: missing ? 'info' : 'ok', text: `Synced ${updated} of ${d.results.length} linked characters.${missing ? ` ${missing} couldn't be found.` : ''}` });
-    } catch (e) {
-      setStatus({ tone: 'error', text: e.message });
     } finally { setBusy(false); }
   };
 
@@ -125,14 +100,11 @@ export default function PoolView({ poolId, apiAvailable }) {
               onClick={() => setEditing({ character: blankCharacter(newId(), chars[0]?.faction), isNew: true })}>
               Add character
             </button>
-            {apiAvailable && (
-              <>
-                <button type="button" className="btn" onClick={() => setImporting(true)} disabled={busy}>Import from Battle.net</button>
-                <button type="button" className="btn" onClick={sync} disabled={busy || dirty || linkedCount === 0}
-                  title={dirty ? 'Save your changes first' : linkedCount === 0 ? 'No characters are linked to Battle.net' : 'Refresh levels and professions'}>
-                  Sync
-                </button>
-              </>
+            {onSync && (
+              <button type="button" className="btn" onClick={onSync} disabled={busy || dirty || syncing}
+                title={dirty ? 'Save your changes first' : 'Add your Battle.net characters and refresh levels and professions from the armory'}>
+                {syncing ? 'Syncing…' : 'Sync with Battle.net'}
+              </button>
             )}
             <button type="button" className={`btn primary ${dirty ? 'pulse' : ''}`} onClick={save} disabled={!dirty || busy}>
               {dirty ? 'Save changes' : 'Saved'}
@@ -175,10 +147,9 @@ export default function PoolView({ poolId, apiAvailable }) {
 
       {editing && (
         <CharacterEditor key={editing.character.id} character={editing.character} isNew={editing.isNew}
-          defaultRealm={realm}
+          region={pool.region} ruleset={pool.ruleset}
           onSave={applyEdit} onDelete={remove} onClose={() => setEditing(null)} />
       )}
-      {importing && <ImportDialog poolId={pool.id} onAdd={addImported} onClose={() => setImporting(false)} />}
     </section>
   );
 }

@@ -215,7 +215,7 @@ dialog.editor {
   background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
 }
 dialog.editor::backdrop { background: rgba(6, 10, 18, 0.72); }
-dialog.editor form, dialog.import { padding: 1.25rem 1.5rem; }
+dialog.editor form { padding: 1.25rem 1.5rem; }
 .editor-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
 .editor-head h2 { font: 1.6rem var(--display); margin: 0; font-weight: 400; color: var(--gold); }
 .editor-head p { margin: 0.15rem 0 0; }
@@ -235,7 +235,7 @@ dialog.editor form, dialog.import { padding: 1.25rem 1.5rem; }
 .race-btn.on { border-color: var(--gold); color: var(--gold); }
 .race-crest { width: 36px; height: 36px; display: grid; place-items: center; background: #0f151f; border-radius: 3px; font-family: var(--display); }
 .names { display: grid; grid-template-columns: 1fr 1fr 6rem; gap: 0.75rem; }
-.names label, .api-link label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.92rem; color: var(--muted); }
+.names label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.92rem; color: var(--muted); }
 input[type='text'], input:not([type]), input[type='number'] {
   background: #141c29; border: 1px solid var(--line); border-radius: var(--radius-s); padding: 0.45rem 0.6rem; color: var(--text); min-width: 0;
 }
@@ -248,16 +248,21 @@ input[type='text'], input:not([type]), input[type='number'] {
 .prof-skill { display: flex; align-items: center; gap: 0.4rem; }
 .prof-skill input[type='range'] { width: 6rem; accent-color: var(--gold); }
 .prof-skill input[type='number'] { width: 4.2rem; }
-.api-link summary { cursor: pointer; color: var(--muted); }
-.api-link label { margin-top: 0.6rem; }
 .errors { margin: 1rem 0 0; padding: 0.6rem 0.9rem 0.6rem 2rem; border: 1px solid #7a3027; border-radius: var(--radius-m); background: #2c1d22; }
 .editor-foot { display: flex; gap: 0.5rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 .spacer { flex: 1; }
-.import-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
-.import-list li label { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.25rem; cursor: pointer; border-top: 1px solid #2a3750; }
-.import-list li.disabled label { opacity: 0.55; cursor: default; }
-.import-name { display: flex; flex-direction: column; }
-.import-name .muted { font-size: 0.9rem; }
+.lookup { display: flex; gap: 0.5rem; }
+.lookup input { flex: 1; }
+.lookup-note { margin: 0.6rem 0 0; }
+.lookup-note.warn { color: #f3c96b; }
+.match-list { list-style: none; margin: 0.5rem 0 0; padding: 0; max-height: 18rem; overflow-y: auto; }
+.match-list button {
+  display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.55rem 0.25rem; text-align: left;
+  background: none; border: 0; border-top: 1px solid #2a3750; cursor: pointer;
+}
+.match-list button:hover { background: #233049; }
+.match-name { display: flex; flex-direction: column; }
+.match-name .muted { font-size: 0.9rem; }
 
 /* Narrow screens: drop the profession grid, show chips under each name */
 @media (max-width: 860px) {
@@ -273,7 +278,7 @@ input[type='text'], input:not([type]), input[type='number'] {
   .toolbar-actions .btn { flex: 1 1 auto; }
   .landing h1, .start h1 { font-size: 1.8rem; }
   .battletag { display: none; }
-  dialog.editor form, dialog.import { padding: 1rem; }
+  dialog.editor form { padding: 1rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .btn.pulse { animation: none; }

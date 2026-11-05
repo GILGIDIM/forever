@@ -18,14 +18,15 @@ export const REGIONS = [
   { id: 'tw', name: 'Taiwan' },
 ];
 
-// One mega-realm per ruleset per region. realmSlug is what the Blizzard
-// profile API expects; TODO: fill in once the realm names are public (they
-// should appear when name reservation opens on 27 October).
+// One mega-realm per ruleset per region. armorySlug is the ruleset.slug the
+// Forever armory reports (seen live, November 2026). No Hardcore character has
+// shown up on the armory yet, so its slug is a guess.
 export const RULESETS = [
-  { id: 'normal', name: 'Normal', realmSlug: null },
-  { id: 'pvp', name: 'PvP', realmSlug: null },
-  { id: 'rp', name: 'RP', realmSlug: null },
-  { id: 'hardcore', name: 'Hardcore', realmSlug: null },
+  { id: 'normal', name: 'Normal', armorySlug: 'normal' },
+  { id: 'pvp', name: 'PvP', armorySlug: 'pvp' },
+  { id: 'rp', name: 'RP', armorySlug: 'roleplay' },
+  { id: 'rppvp', name: 'RP-PvP', armorySlug: 'roleplay-pvp' },
+  { id: 'hardcore', name: 'Hardcore', armorySlug: 'hardcore' },
 ];
 
 export const FACTIONS = [
@@ -133,9 +134,18 @@ const nameIndex = (list, extra = {}) => {
   return { ...m, ...extra };
 };
 const CLASS_NAME_INDEX = nameIndex(CLASSES);
-const RACE_NAME_INDEX = nameIndex(RACES, { scourge: 'undead', forsaken: 'undead' });
+const RACE_NAME_INDEX = nameIndex(RACES, {
+  scourge: 'undead', forsaken: 'undead',
+  // The armory names Skyborne per faction.
+  highorderskyborne: 'skyborne', windshaperskyborne: 'skyborne',
+});
 const PROF_NAME_INDEX = nameIndex(PROFESSIONS);
 
 export const classIdFromName = (n) => CLASS_NAME_INDEX[norm(n)] || null;
 export const raceIdFromName = (n) => RACE_NAME_INDEX[norm(n)] || null;
 export const professionIdFromName = (n) => PROF_NAME_INDEX[norm(n)] || null;
+export const rulesetIdFromSlug = (slug) => RULESETS.find((r) => r.armorySlug === slug)?.id || null;
+
+// Armory character slug: "Loki" + "Bane" -> "loki-bane".
+export const armorySlug = (forename, surname) =>
+  [forename, surname].map((s) => String(s || '').trim().toLowerCase()).filter(Boolean).join('-');

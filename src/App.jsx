@@ -88,14 +88,61 @@ function Landing({ me }) {
   );
 }
 
+function SyncSummary({ result }) {
+  if (result.error) {
+    return <div className="status status-error" role="alert"><p>Sync failed: {result.error.message}</p></div>;
+  }
+  const { added, linked, updated, skipped, signInAgain } = result;
+  const parts = [
+    added.length && `added ${added.length}`,
+    linked.length && `linked ${linked.length} you'd entered by hand`,
+    updated && `refreshed ${updated}`,
+  ].filter(Boolean);
+  return (
+    <div className={`status ${skipped.length || signInAgain ? '' : 'status-ok'}`} role="status">
+      <p>
+        {parts.length ? `Synced with Battle.net: ${parts.join(', ')}.` : 'Synced with Battle.net: nothing new found.'}
+        {signInAgain && <> Your Battle.net sign-in has expired, so new characters weren't picked up. <a href="/api/auth/login">Sign in again</a>.</>}
+      </p>
+      {skipped.length > 0 && <ul>{skipped.map((s) => <li key={s.name}>{s.name}: {s.reason}</li>)}</ul>}
+    </div>
+  );
+}
+
 function MyPools({ me, route, go }) {
   const [pools, setPools] = useState(null);
   const [creating, setCreating] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
+  const [syncCount, setSyncCount] = useState(0); // remounts the open warband after a sync
 
-  useEffect(() => { api.myPools().then((d) => setPools(d.pools)); }, []);
+  const sync = useCallback(async () => {
+    setSyncing(true); setSyncResult(null);
+    try {
+      const d = await api.sync();
+      setPools(d.pools);
+      setSyncResult(d);
+      setSyncCount((n) => n + 1);
+    } catch (e) {
+      setSyncResult({ error: e });
+      api.myPools().then((d) => setPools(d.pools));
+    } finally { setSyncing(false); }
+  }, []);
 
-  if (!pools) return <p className="hint pad">Loading…</p>;
+  // Straight after Battle.net sign-in, pull the account's characters in.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.has('signedin')) {
+      q.delete('signedin');
+      window.history.replaceState(null, '', `${window.location.pathname}${q.size ? `?${q}` : ''}`);
+      sync();
+    } else {
+      api.myPools().then((d) => setPools(d.pools));
+    }
+  }, [sync]);
+
+  if (!pools) return <p className="hint pad">{syncing ? 'Pulling your characters from the armory…' : 'Loading…'}</p>;
 
   const create = async (region, ruleset) => {
     setBusy(true);
@@ -110,8 +157,16 @@ function MyPools({ me, route, go }) {
   if (pools.length === 0 || creating) {
     return (
       <main className="start">
+        {syncResult && <SyncSummary result={syncResult} />}
         <h1>{pools.length === 0 ? 'Where will you be playing?' : 'New warband'}</h1>
         <p className="muted">Each region and ruleset gets its own warband, so you can plan a Hardcore set separately from your PvP characters.</p>
+        {pools.length === 0 && (
+          <p className="muted">
+            Already playing? <button type="button" className="btn small" onClick={sync} disabled={syncing}>
+              {syncing ? 'Syncing…' : 'Sync with Battle.net'}
+            </button> to build your warbands from the armory.
+          </p>
+        )}
         <NewPoolForm existing={pools} onCreate={create} busy={busy} onCancel={pools.length ? () => setCreating(false) : null} />
       </main>
     );
@@ -121,7 +176,8 @@ function MyPools({ me, route, go }) {
   return (
     <main>
       <PoolTabs pools={pools} activeId={active.id} onPick={(id) => go(`/?warband=${id}`)} onNew={() => setCreating(true)} />
-      <PoolView key={active.id} poolId={active.id} me={me} apiAvailable={me.apiAvailable} />
+      {syncResult && <SyncSummary result={syncResult} />}
+      <PoolView key={`${active.id}/${syncCount}`} poolId={active.id} onSync={sync} syncing={syncing} />
     </main>
   );
 }
@@ -141,7 +197,7 @@ function SharedPools({ handle, route, go, me }) {
     <main>
       <PoolTabs pools={data.pools} activeId={active.id}
         onPick={(id) => go(`/u/${encodeURIComponent(handle)}?warband=${id}`)} />
-      <PoolView key={active.id} poolId={active.id} me={me} apiAvailable={me.apiAvailable} />
+      <PoolView key={active.id} poolId={active.id} />
       {!me.user && (
         <p className="hint pad">Want your own warband? <a href="/api/auth/login">Sign in with Battle.net</a>.</p>
       )}

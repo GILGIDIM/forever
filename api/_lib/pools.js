@@ -12,8 +12,7 @@ export function toCharacter(row) {
     gender: row.gender,
     level: row.level,
     professions: row.professions || {},
-    apiName: row.api_name,
-    apiRealm: row.api_realm,
+    armorySlug: row.api_name,
     syncedAt: row.synced_at,
   };
 }
@@ -64,11 +63,11 @@ export async function saveCharacters(poolId, characters) {
       await tx`
         INSERT INTO characters
           (id, pool_id, position, forename, surname, faction, race, class, gender, level,
-           professions, api_name, api_realm, synced_at)
+           professions, api_name, synced_at)
         VALUES
           (${c.id}, ${poolId}, ${position}, ${c.forename}, ${c.surname}, ${c.faction}, ${c.race},
-           ${c.class}, ${c.gender}, ${c.level}, ${tx.json(c.professions)}, ${c.apiName},
-           ${c.apiRealm}, ${c.syncedAt})`;
+           ${c.class}, ${c.gender}, ${c.level}, ${tx.json(c.professions)}, ${c.armorySlug},
+           ${c.syncedAt})`;
     }
     await tx`UPDATE pools SET updated_at = now() WHERE id = ${poolId}`;
   });

@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS characters (
   gender      TEXT NOT NULL,
   level       INTEGER NOT NULL DEFAULT 1,
   professions JSONB NOT NULL DEFAULT '{}',   -- { "tailoring": 300, "cooking": 75 }
-  api_name    TEXT,                          -- in-game name used for Blizzard API lookups
-  api_realm   TEXT,                          -- realm slug for the lookup
+  api_name    TEXT,                          -- armory slug ("loki-bane"); null = manual only
+  api_realm   TEXT,                          -- unused: Forever characters have no realm
   synced_at   TIMESTAMPTZ
 );
 

@@ -17,5 +17,5 @@ export default handler(['GET'], async (req, res) => {
     ON CONFLICT (handle) DO UPDATE SET token_expires_at = now() + interval '1 day'
     RETURNING id`;
   setCookies(res, [await sessionCookie(user.id)]);
-  redirect(res, `${publicUrl()}/`);
+  redirect(res, `${publicUrl()}/?signedin=1`);
 });

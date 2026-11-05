@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FACTIONS, GENDERS, PROFESSIONS, LEVEL_CAP, PROFESSION_CAP,
-  MAX_PRIMARY_PROFESSIONS, MAX_NAME_LENGTH, classesForFaction, racesFor, isValidCombo,
+  MAX_PRIMARY_PROFESSIONS, MAX_NAME_LENGTH, CLASS_BY_ID, RACE_BY_ID, REGION_BY_ID, RULESET_BY_ID,
+  classesForFaction, racesFor, isValidCombo,
 } from '../../shared/gameData.js';
+import { api } from '../api.js';
+import { fullName } from '../format.js';
 import { validateCharacter } from '../../shared/validate.js';
 import { raceIcon } from '../assets.js';
 import ProfIcon from './ProfIcon.jsx';
@@ -40,7 +43,74 @@ function ProfessionRow({ prof, value, disabled, onToggle, onChange }) {
   );
 }
 
-export default function CharacterEditor({ character, isNew, defaultRealm, onSave, onDelete, onClose }) {
+// Paste a name or armory link; an exact hit fills the form, otherwise pick
+// from the armory's name search.
+function ArmoryLookup({ region, ruleset, onFound }) {
+  const [q, setQ] = useState('');
+  const [state, setState] = useState({ busy: false, error: null, matches: null, note: null });
+
+  const find = async (text = q) => {
+    if (text.trim().length < 2) return;
+    setState({ busy: true, error: null, matches: null, note: null });
+    try {
+      const d = await api.lookup(region, text.trim());
+      if (!d.character) {
+        setState({ busy: false, error: null, matches: d.matches, note: null });
+        return;
+      }
+      const c = d.character;
+      const elsewhere = c.region !== region || c.ruleset !== ruleset;
+      onFound(c);
+      setQ('');
+      setState({
+        busy: false, error: null, matches: null,
+        note: elsewhere
+          ? { warn: true, text: `Filled in from the armory, but ${fullName(c)} plays on ${REGION_BY_ID[c.region]?.name} ${c.rulesetName}, not this warband.` }
+          : { warn: false, text: `Filled in from the armory. Sync with Battle.net keeps ${c.forename} up to date.` },
+      });
+    } catch (e) {
+      setState({ busy: false, error: e, matches: null, note: null });
+    }
+  };
+
+  return (
+    <fieldset className="step">
+      <legend>Find on the armory</legend>
+      <div className="lookup">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Loki Bane, or paste an armory link"
+          aria-label="Character name or armory link"
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); find(); } }} />
+        <button type="button" className="btn" onClick={() => find()} disabled={state.busy || q.trim().length < 2}>
+          {state.busy ? 'Looking…' : 'Find'}
+        </button>
+      </div>
+      {state.error && <p className="lookup-note warn" role="alert">{state.error.message}</p>}
+      {state.note && <p className={`lookup-note ${state.note.warn ? 'warn' : 'muted'}`} role="status">{state.note.text}</p>}
+      {state.matches && (state.matches.length === 0
+        ? <p className="lookup-note muted">No one by that name on the {REGION_BY_ID[region]?.name} armory.</p>
+        : (
+          <ul className="match-list" aria-label="Armory matches">
+            {state.matches.map((m) => (
+              <li key={m.slug}>
+                <button type="button" onClick={() => find(m.slug)}>
+                  <Portrait race={m.race} gender={m.gender} classId={m.class} faction={m.faction} level={m.level} size={40} />
+                  <span className="match-name">
+                    <span><span className="forename">{m.forename}</span> <span className="surname">{m.surname}</span></span>
+                    <span className="muted">
+                      {RACE_BY_ID[m.race]?.name} {CLASS_BY_ID[m.class]?.name}, {m.rulesetName}
+                      {m.ruleset !== ruleset ? ` (not ${RULESET_BY_ID[ruleset]?.name})` : ''}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ))}
+    </fieldset>
+  );
+}
+
+export default function CharacterEditor({ character, isNew, region, ruleset, onSave, onDelete, onClose }) {
   const ref = useRef(null);
   const [c, setC] = useState(character);
   const [errors, setErrors] = useState([]);
@@ -70,14 +140,15 @@ export default function CharacterEditor({ character, isNew, defaultRealm, onSave
 
   const submit = (e) => {
     e.preventDefault();
-    const { character: clean, errors: errs } = validateCharacter({
-      ...c,
-      apiName: c.apiName || null,
-      apiRealm: c.apiName ? (c.apiRealm || defaultRealm || null) : null,
-    });
+    const { character: clean, errors: errs } = validateCharacter(c);
     if (errs.length) { setErrors(errs); return; }
     onSave(clean);
   };
+
+  const fromArmory = (a) => set({
+    forename: a.forename, surname: a.surname, faction: a.faction, race: a.race || '', class: a.class || '',
+    gender: a.gender, level: a.level, professions: a.professions, armorySlug: a.slug,
+  });
 
   const classes = c.faction ? classesForFaction(c.faction) : [];
   const races = c.faction && c.class ? racesFor(c.faction, c.class) : [];
@@ -93,6 +164,13 @@ export default function CharacterEditor({ character, isNew, defaultRealm, onSave
           </div>
           <button type="button" className="icon-btn close" onClick={() => ref.current.close()} aria-label="Close">✕</button>
         </header>
+
+        {c.armorySlug ? (
+          <p className="hint">
+            Linked to the armory as <strong>{c.armorySlug}</strong>; Sync with Battle.net refreshes level and professions.{' '}
+            <button type="button" className="btn ghost small" onClick={() => set({ armorySlug: null })}>Unlink</button>
+          </p>
+        ) : <ArmoryLookup region={region} ruleset={ruleset} onFound={fromArmory} />}
 
         <fieldset className="step">
           <legend>Faction</legend>
@@ -169,13 +247,6 @@ export default function CharacterEditor({ character, isNew, defaultRealm, onSave
           </div>
         </fieldset>
 
-        <details className="step api-link">
-          <summary>Battle.net link {c.apiName ? `(${c.apiName})` : '(not linked)'}</summary>
-          <p className="hint">Linked characters get their level and professions refreshed by Sync. Leave blank to keep everything manual.</p>
-          <label>In-game name<input value={c.apiName || ''} onChange={(e) => set({ apiName: e.target.value })} placeholder={c.forename || 'Name'} /></label>
-          <label>Realm slug<input value={c.apiRealm || ''} onChange={(e) => set({ apiRealm: e.target.value })} placeholder={defaultRealm || 'Known after launch'} /></label>
-        </details>
-
         {errors.length > 0 && (
           <ul className="errors" role="alert">{errors.map((e) => <li key={e}>{e}</li>)}</ul>
         )}
@@ -196,5 +267,5 @@ export default function CharacterEditor({ character, isNew, defaultRealm, onSave
 }
 
 export function blankCharacter(id, faction = 'horde') {
-  return { id, forename: '', surname: '', faction, race: '', class: '', gender: 'male', level: 1, professions: {}, apiName: null, apiRealm: null, syncedAt: null };
+  return { id, forename: '', surname: '', faction, race: '', class: '', gender: 'male', level: 1, professions: {}, armorySlug: null, syncedAt: null };
 }

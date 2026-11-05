@@ -3,7 +3,7 @@ import { handler, redirect, setCookies, cookie, publicUrl, HttpError } from '../
 import { OAUTH_HOST } from '../_lib/blizzard.js';
 
 // Starts Battle.net sign-in. wow.profile lets us list the account's
-// characters for import.
+// Forever characters for sync.
 export default handler(['GET'], async (req, res) => {
   const clientId = process.env.BLIZZARD_CLIENT_ID;
   if (!clientId) throw new HttpError(500, 'Battle.net sign-in is not configured.');

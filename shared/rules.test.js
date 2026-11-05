@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { classesForFaction, racesFor, isValidCombo, raceIdFromName, classIdFromName } from './gameData.js';
+import {
+  classesForFaction, racesFor, isValidCombo, raceIdFromName, classIdFromName, rulesetIdFromSlug, armorySlug,
+} from './gameData.js';
 import { validateCharacter } from './validate.js';
 
 const base = {
@@ -58,4 +60,18 @@ test('secondaries do not count toward the primary limit', () => {
 test('level and skill bounds', () => {
   assert.ok(validateCharacter({ ...base, level: 61 }).errors.length);
   assert.ok(validateCharacter({ ...base, professions: { mining: 301 } }).errors.length);
+});
+
+test('armory names map to our ids', () => {
+  assert.equal(raceIdFromName('Night Elf'), 'nightelf');
+  assert.equal(raceIdFromName('High Order Skyborne'), 'skyborne');
+  assert.equal(raceIdFromName('Windshaper Skyborne'), 'skyborne');
+  assert.equal(rulesetIdFromSlug('roleplay'), 'rp');
+  assert.equal(rulesetIdFromSlug('roleplay-pvp'), 'rppvp');
+  assert.equal(rulesetIdFromSlug('seasonal'), null);
+});
+
+test('armory slug is forename-surname', () => {
+  assert.equal(armorySlug('Loki', 'Bane'), 'loki-bane');
+  assert.equal(armorySlug('Loki', ''), 'loki');
 });
