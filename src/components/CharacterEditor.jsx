@@ -77,7 +77,7 @@ function ArmoryLookup({ region, ruleset, onFound }) {
     <fieldset className="step">
       <legend>Find on the armory</legend>
       <div className="lookup">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Loki Bane, or paste an armory link"
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Loki Calavera, or paste armory URL"
           aria-label="Character name or armory link"
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); find(); } }} />
         <button type="button" className="btn" onClick={() => find()} disabled={state.busy || q.trim().length < 2}>
